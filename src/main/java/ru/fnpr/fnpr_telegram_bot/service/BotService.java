@@ -1,48 +1,29 @@
-package ru.fnpr.fnpr_telegram_bot.controller;
+package ru.fnpr.fnpr_telegram_bot.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.fnpr.fnpr_telegram_bot.model.Question;
-import ru.fnpr.fnpr_telegram_bot.service.QuestionService;
+import ru.fnpr.fnpr_telegram_bot.repository.QuestionRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BotService {
+
     @Autowired
-    private QuestionService questionService;
+    private QuestionRepository questionRepository;
 
-    public void processUpdate(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String userMessage = update.getMessage().getText();
-
-            // Логика обработки вопросов
-            List<Question> questions = questionService.getAllQuestions();
-            // Формирование ответа
-            String response = generateResponse(questions);
-
-            // Отправка сообщения
-            SendMessage message = new SendMessage();
-            message.setChatId(update.getMessage().getChatId().toString());
-            message.setText(response);
-
-            // Метод для отправки сообщения через бот (пока можно оставить заглушку)
-            sendMessageToUser(message);
-        }
+    public List<Question> getQuestionsByLevel(int level) {
+        return questionRepository.findByLevel(level);
     }
 
-    private String generateResponse(List<Question> questions) {
-        // Пример простой логики формирования ответа
-        StringBuilder response = new StringBuilder("Выберите вопрос:\n");
-        for (Question question : questions) {
-            response.append(question.getId()).append(". ").append(question.getText()).append("\n");
-        }
-        return response.toString();
+    public Question getQuestionById(Long id) {
+        Optional<Question> question = questionRepository.findById(id);
+        return question.orElse(null);
     }
 
-    private void sendMessageToUser(SendMessage message) {
-        // Здесь позже можно настроить отправку через Telegram API
+    public List<Question> getQuestionsByParentId(Long parentQuestionId) {
+        return questionRepository.findByParentQuestionId(parentQuestionId);
     }
 }
