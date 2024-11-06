@@ -5,10 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;  // добавлено
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+
 @Entity
+@Table(name = "questions")  // Указываем имя таблицы в базе данных
 @Getter
 @Setter
 public class Question {
@@ -29,12 +33,15 @@ public class Question {
     @Column(name = "subcategory")
     private String subcategory;
 
+    @Column(name = "parent_question_id")
+    private Long parentQuestionId; // Название столбца должно быть точно таким
+
     @Column(name = "level")
     private int level;
 
-    @Column(name = "parent_question_id")
-    private Integer parentQuestionId;
-
     @Column(name = "created_at")
-    private java.sql.Timestamp createdAt;
+    private Timestamp createdAt;
+
+    @Column(name = "url")
+    private String url;
 }

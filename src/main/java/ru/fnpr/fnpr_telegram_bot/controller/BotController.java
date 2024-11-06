@@ -1,6 +1,7 @@
 package ru.fnpr.fnpr_telegram_bot.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -11,18 +12,18 @@ import ru.fnpr.fnpr_telegram_bot.model.Question;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Component
 public class BotController extends TelegramLongPollingBot {
 
     private final String botName;
     private final String botToken;
 
-    @Autowired
-    private BotService botService;
+    private final BotService botService;
 
-    public BotController(String botName, String botToken) {
+    public BotController(String botName, String botToken, BotService botService) {
         this.botName = botName;
         this.botToken = botToken;
+        this.botService = botService;
     }
 
     @Override

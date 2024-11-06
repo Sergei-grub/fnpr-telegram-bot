@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import ru.fnpr.fnpr_telegram_bot.controller.BotController;
+import ru.fnpr.fnpr_telegram_bot.service.BotService;
 
 @Configuration
 public class BotConfig {
@@ -18,11 +19,14 @@ public class BotConfig {
     private String botToken;
 
     @Bean
-    public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
-        // Используем конструктор с DefaultBotSession
+    public TelegramBotsApi telegramBotsApi(BotController botController) throws TelegramApiException {
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-        BotController botController = new BotController(botName, botToken); // Передаем параметры в контроллер
-        botsApi.registerBot(botController); // Регистрируем бота
+        botsApi.registerBot(botController);
         return botsApi;
+    }
+
+    @Bean
+    public BotController botController(BotService botService) {
+        return new BotController(botName, botToken, botService);
     }
 }
