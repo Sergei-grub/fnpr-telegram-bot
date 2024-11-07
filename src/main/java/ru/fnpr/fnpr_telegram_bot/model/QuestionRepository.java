@@ -1,4 +1,4 @@
-package ru.fnpr.fnpr_telegram_bot.repository;
+package ru.fnpr.fnpr_telegram_bot.model;
 
 import ru.fnpr.fnpr_telegram_bot.model.Question;
 import org.springframework.data.jpa.repository.JpaRepository;

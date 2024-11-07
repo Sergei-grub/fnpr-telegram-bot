@@ -1,9 +1,9 @@
-package ru.fnpr.fnpr_telegram_bot.service;
+package ru.fnpr.fnpr_telegram_bot.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.fnpr.fnpr_telegram_bot.model.Question;
-import ru.fnpr.fnpr_telegram_bot.repository.QuestionRepository;
+import ru.fnpr.fnpr_telegram_bot.model.QuestionRepository;
 
 import java.util.List;
 import java.util.Optional;

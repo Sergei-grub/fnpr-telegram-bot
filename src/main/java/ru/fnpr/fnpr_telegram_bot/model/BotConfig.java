@@ -1,4 +1,4 @@
-package ru.fnpr.fnpr_telegram_bot;
+package ru.fnpr.fnpr_telegram_bot.model;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import ru.fnpr.fnpr_telegram_bot.controller.BotController;
-import ru.fnpr.fnpr_telegram_bot.service.BotService;
+import ru.fnpr.fnpr_telegram_bot.controller.BotService;
 
 @Configuration
 public class BotConfig {
