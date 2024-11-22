@@ -18,12 +18,14 @@ public class BotService {
         return questionRepository.findByLevel(level);
     }
 
+    public List<Question> getQuestionsByParentId(Long parentQuestionId) {
+        return questionRepository.findByParentQuestionId(parentQuestionId);
+    }
+
     public Question getQuestionById(Long id) {
         Optional<Question> question = questionRepository.findById(id);
         return question.orElse(null);
-    }
 
-    public List<Question> getQuestionsByParentId(Long parentQuestionId) {
-        return questionRepository.findByParentQuestionId(parentQuestionId);
+
     }
 }

@@ -10,5 +10,4 @@ public class FnprTelegramBotApplication {
 
         SpringApplication.run(FnprTelegramBotApplication.class, args);
     }
-
 }
