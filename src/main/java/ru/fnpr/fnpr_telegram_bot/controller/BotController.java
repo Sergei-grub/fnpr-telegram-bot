@@ -1,6 +1,7 @@
 package ru.fnpr.fnpr_telegram_bot.controller;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -10,27 +11,31 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.fnpr.fnpr_telegram_bot.model.Buttons;
+
+import java.util.List;
 
 
 @Component
 public class BotController extends TelegramLongPollingBot {
     @Value("${telegram.bot.name}")
     private final String botName;
-//    private final ButtonsService buttonsService;
+    private final ButtonsService buttonsService;
 
     private final CommandHandler commandHandler;
     private final UserResponseHandler userResponseHandler;
     private final CallbackQueryHandler callbackQueryHandler;
 
+    @Autowired
     public BotController(@Value("${telegram.bot.name}") String botName,
                          @Value("${telegram.bot.token}") String botToken,
-//                         ButtonsService buttonsService,
+                         ButtonsService buttonsService,
                          CommandHandler commandHandler,
                          UserResponseHandler userResponseHandler,
                          CallbackQueryHandler callbackQueryHandler) {
         super(new DefaultBotOptions(), botToken);
         this.botName = botName;
-//        this.buttonsService = buttonsService;
+        this.buttonsService = buttonsService;
         this.commandHandler = commandHandler;
         this.userResponseHandler = userResponseHandler;
         this.callbackQueryHandler = callbackQueryHandler;
@@ -43,7 +48,6 @@ public class BotController extends TelegramLongPollingBot {
 
     private static final Logger logger = LoggerFactory.getLogger(BotController.class);
 
-
     @Override
     public void onUpdateReceived(Update update) {
         logger.info("Received update: {}", update);
@@ -51,17 +55,26 @@ public class BotController extends TelegramLongPollingBot {
             String userMessage = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
 
-            // Обработка команды /start
-            if (userMessage.equals("/start")) {
-                commandHandler.handleStartCommand(chatId);
+            // Извлекаем все кнопки из кэша
+            List<Buttons> commandButtons = buttonsService.getButtonsByType(Buttons.ButtonType.commands);
+
+            // Ищем подходящую кнопку по имени
+            List<Buttons> matchingButtons = buttonsService.filterButtons(Buttons::getName, userMessage.substring(1)); // Убираем "/"
+
+            if (!matchingButtons.isEmpty()) {
+                // Если найдены совпадения, обрабатываем первую найденную кнопку
+                Buttons button = matchingButtons.get(0);
+                commandHandler.handleCommand(button.getCallbackData(), chatId);
             } else {
-                userResponseHandler.handleUserResponse(update);
+                logger.warn("Unknown command received: {}", userMessage);
+                // Если команда не распознана, можно обработать как пользовательский ответ
+                userResponseHandler.handleUserResponse(userMessage, chatId);
             }
         } else if (update.hasCallbackQuery()) {
             callbackQueryHandler.handleCallbackQuery(update);
         }
     }
-
+}
 //    private void handleCallbackQuery(Update update) {
 //        String callbackData = update.getCallbackQuery().getData();
 //        Long questionId = Long.valueOf(callbackData);
@@ -177,5 +190,5 @@ public class BotController extends TelegramLongPollingBot {
 //            logger.error("Ошибка при отправке сообщения: ", e);
 //        }
 //    }
-
-}
+//
+//}

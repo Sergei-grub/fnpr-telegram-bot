@@ -28,7 +28,13 @@ public class ButtonsService {
 
     @PostConstruct
     public void loadButtonsIntoCache() {
-        cachedButtons = buttonsRepository.findAll();
+        log.info("Начинаем загрузку кнопок в кэш.");
+        try {
+            cachedButtons = buttonsRepository.findAll();
+            log.info("Загружено {} кнопок в кэш.", cachedButtons.size());
+        } catch (Exception e) {
+            log.error("Произошла ошибка при загрузке кнопок в кэш: {}", e.getMessage());
+        }
     }
 
     public List<Buttons> getAllButtons() {

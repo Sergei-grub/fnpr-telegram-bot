@@ -55,6 +55,7 @@ public class Buttons {
         keyboard,
         inline,
         web_view,
+        commands,
         text
     }
 }
