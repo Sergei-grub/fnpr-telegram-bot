@@ -1,4 +1,4 @@
-package ru.fnpr.fnpr_telegram_bot.controller;
+package ru.fnpr.fnpr_telegram_bot.model;
 
 
 import lombok.extern.slf4j.Slf4j;

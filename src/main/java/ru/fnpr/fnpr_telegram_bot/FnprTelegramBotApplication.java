@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class FnprTelegramBotApplication {
 
     public static void main(String[] args) {
-
         SpringApplication.run(FnprTelegramBotApplication.class, args);
     }
 }
