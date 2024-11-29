@@ -17,21 +17,31 @@ public class CommandHandler {
         this.buttonsService = buttonsService;
     }
 
-    public void handleCommand(String commandCallbackData, Long chatId) {
-        // Ищем кнопку по callbackData
-        List<Buttons> matchingButtons = buttonsService.getButtonsByCallbackData(commandCallbackData);
+    public String handleCommand(String userMessage) {
+        // Убираем "/" из начала сообщения
+        String commandName = userMessage.substring(1);
 
-        if (!matchingButtons.isEmpty()) {
-            Buttons button = matchingButtons.get(0);
-            sendResponse(button.getTextInfo(), chatId); // Отправляем текст, связанный с кнопкой
+        // Ищем подходящую кнопку по имени
+        List<Buttons> matchingButtons = buttonsService.filterButtons(Buttons::getName, commandName);
+
+        // Проверяем, найдена ли кнопка
+        if (matchingButtons.isEmpty()) {
+            return "Команда не найдена";
         }
+
+        // Предполагаем, что мы ищем только одну кнопку
+        Buttons foundButton = matchingButtons.get(0);
+        String textInfo = foundButton.getTextInfo(); // Предполагаем, что метод getTextInfo() возвращает значение поля text_info
+        System.out.println("Retrieved textInfo: " + textInfo);
+        System.out.println("Contains newline: " + textInfo.contains("\n"));
+
+        // Проверяем, есть ли данные в text_info
+        if (textInfo == null || textInfo.isEmpty()) {
+            return "Данные отсутствуют";
+        }
+
+        // Возвращаем значение text_info
+        return textInfo;
     }
 
-    private void sendResponse(String responseText, Long chatId) {
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(responseText); // Используем текст из кнопки
-
-
-    }
 }

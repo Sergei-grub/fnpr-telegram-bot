@@ -6,7 +6,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.generics.BotSession;
 import org.slf4j.Logger;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
@@ -28,7 +27,7 @@ public class BotInitializer implements CommandLineRunner {
             botsApi.registerBot(botController); // Регистрация бота
             System.out.println("Bot registered successfully");
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            logger.error("Ошибка при инициализации: ", e);
         }
     }
 }

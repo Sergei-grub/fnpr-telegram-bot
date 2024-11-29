@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.fnpr.fnpr_telegram_bot.model.Buttons;
 import ru.fnpr.fnpr_telegram_bot.model.ButtonsService;
 
+import java.util.regex.Pattern;
 import java.util.List;
 
 
@@ -23,7 +24,7 @@ import java.util.List;
 public class BotController extends TelegramLongPollingBot {
     @Value("${telegram.bot.name}")
     private String botName;
-    private final ButtonsService buttonsService;
+//    private final ButtonsService buttonsService;
 
     private final CommandHandler commandHandler;
     private final UserResponseHandler userResponseHandler;
@@ -39,7 +40,7 @@ public class BotController extends TelegramLongPollingBot {
                          CallbackQueryHandler callbackQueryHandler) {
         super(new DefaultBotOptions(), botToken);
         this.botName = botName;
-        this.buttonsService = buttonsService;
+//        this.buttonsService = buttonsService;
         this.commandHandler = commandHandler;
         this.userResponseHandler = userResponseHandler;
         this.callbackQueryHandler = callbackQueryHandler;
@@ -58,17 +59,14 @@ public class BotController extends TelegramLongPollingBot {
             logger.info("Received message: {}", update.getMessage().getText());
             String userMessage = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
-            sendResponse(chatId, "Вы написали: " + userMessage);
-            // Извлекаем все кнопки из кэша
-            List<Buttons> commandButtons = buttonsService.getButtonsByType(Buttons.ButtonType.commands);
-            // Ищем подходящую кнопку по имени
-            List<Buttons> matchingButtons = buttonsService.filterButtons(Buttons::getName, userMessage.substring(1)); // Убираем "/"
+
+            String testMsg = "Привет!\nКак дела?";
+            sendResponse(chatId, testMsg);
 
 
-            if (!matchingButtons.isEmpty()) {
-                Buttons button = matchingButtons.get(0); // Если найдены совпадения, обрабатываем первую найденную кнопку
-                commandHandler.handleCommand(button.getCallbackData(), chatId);
-
+            if (userMessage.startsWith("/")) {
+                String matchingCommand = commandHandler.handleCommand(userMessage);
+                sendResponse(chatId, matchingCommand);
             } else {
                 logger.warn("Unknown command received: {}", userMessage);
                 userResponseHandler.handleUserResponse(userMessage, chatId); // Если команда не распознана, можно обработать как пользовательский ответ
@@ -79,16 +77,40 @@ public class BotController extends TelegramLongPollingBot {
         }
 
     }
+
+
     public void sendResponse(long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(text);
-        logger.info("Sending message to chatId {}: {}", chatId, text);
+        System.out.println("TEST: "+ message);
+
         try {
             execute(message); // Отправляем сообщение
         } catch (TelegramApiException e) {
             logger.error("Ошибка при отправке сообщения: ", e);
         }
     }
-
 }
+
+//        if (containsHtml(text)) {
+//            message.setParseMode("HTML"); // Указываем режим парсинга как HTML
+//            logger.info("Sending HTML message to chatId {}: {}", chatId, text);
+//            try {
+//                execute(message); // Отправляем сообщение
+//            } catch (TelegramApiException e) {
+//                logger.error("Ошибка при отправке сообщения: ", e);
+//            }
+//        } else {
+//            try {
+//                execute(message); // Отправляем сообщение
+//            } catch (TelegramApiException e) {
+//                logger.error("Ошибка при отправке сообщения: ", e);
+//            }
+//        }
+//
+//    }
+//
+//    private boolean containsHtml(String message) {
+//        return HTML_PATTERN.matcher(message).find();
+//    }
