@@ -2,7 +2,6 @@ package ru.fnpr.fnpr_telegram_bot.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.fnpr.fnpr_telegram_bot.model.Buttons;
 import ru.fnpr.fnpr_telegram_bot.model.ButtonsService;
 
@@ -35,13 +34,7 @@ public class CommandHandler {
         System.out.println("Retrieved textInfo: " + textInfo);
         System.out.println("Contains newline: " + textInfo.contains("\n"));
 
-        // Проверяем, есть ли данные в text_info
-        if (textInfo == null || textInfo.isEmpty()) {
-            return "Данные отсутствуют";
-        }
-
         // Возвращаем значение text_info
         return textInfo;
     }
-
 }

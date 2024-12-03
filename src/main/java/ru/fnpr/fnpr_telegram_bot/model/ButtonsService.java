@@ -82,6 +82,7 @@ public class ButtonsService {
     }
 
     public List<Buttons> getButtonsByType(Buttons.ButtonType type) {
+        log.info("Filtering buttons by type: {}", type);
         return filterButtons(Buttons::getType, type);
     }
 

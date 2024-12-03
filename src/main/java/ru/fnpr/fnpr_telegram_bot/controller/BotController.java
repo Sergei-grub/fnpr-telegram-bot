@@ -12,12 +12,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.fnpr.fnpr_telegram_bot.model.Buttons;
 import ru.fnpr.fnpr_telegram_bot.model.ButtonsService;
-
-import java.util.regex.Pattern;
-import java.util.List;
+import ru.fnpr.fnpr_telegram_bot.view.InlineKeyboard;
+import ru.fnpr.fnpr_telegram_bot.view.KeyboardMarkup;
 
 
 @Component
@@ -30,6 +30,8 @@ public class BotController extends TelegramLongPollingBot {
     private final UserResponseHandler userResponseHandler;
     private final CallbackQueryHandler callbackQueryHandler;
     private static final Logger logger = LoggerFactory.getLogger(BotController.class);
+    private final KeyboardMarkup keyboardMarkup;
+    private final InlineKeyboard inlineKeyboard;
 
     @Autowired
     public BotController(@Value("${telegram.bot.name}") String botName,
@@ -37,15 +39,16 @@ public class BotController extends TelegramLongPollingBot {
                          ButtonsService buttonsService,
                          CommandHandler commandHandler,
                          UserResponseHandler userResponseHandler,
-                         CallbackQueryHandler callbackQueryHandler) {
+                         CallbackQueryHandler callbackQueryHandler, KeyboardMarkup keyboardMarkup, InlineKeyboard inlineKeyboard) {
         super(new DefaultBotOptions(), botToken);
         this.botName = botName;
 //        this.buttonsService = buttonsService;
         this.commandHandler = commandHandler;
         this.userResponseHandler = userResponseHandler;
         this.callbackQueryHandler = callbackQueryHandler;
+        this.keyboardMarkup = keyboardMarkup;
+        this.inlineKeyboard = inlineKeyboard;
     }
-
     @Override
     public String getBotUsername() {
         return botName;
@@ -61,29 +64,59 @@ public class BotController extends TelegramLongPollingBot {
             Long chatId = update.getMessage().getChatId();
 
             String testMsg = "Привет!\nКак дела?";
-            sendResponse(chatId, testMsg);
+            // Создаем обычные кнопки
+            ReplyKeyboardMarkup keyboard = keyboardMarkup.createReplyKeyboard("keyboard");
+            sendResponse(chatId, testMsg, keyboard);
 
 
             if (userMessage.startsWith("/")) {
                 String matchingCommand = commandHandler.handleCommand(userMessage);
-                sendResponse(chatId, matchingCommand);
+                sendResponse(chatId, matchingCommand, keyboard);
             } else {
                 logger.warn("Unknown command received: {}", userMessage);
                 userResponseHandler.handleUserResponse(userMessage, chatId); // Если команда не распознана, можно обработать как пользовательский ответ
             }
 
         } else if (update.hasCallbackQuery()) {
-            callbackQueryHandler.handleCallbackQuery(update);
-        }
+            // Обработка нажатия кнопки
+            String callbackData = update.getCallbackQuery().getData();
+            Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
+            // Пример создания Web App кнопки
+            InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboard.createWebAppButton("Получить юридическую консультацию", "https://fnpr.ru/legal/");
+
+            // Отправляем сообщение с инлайн-кнопкой
+            sendResponseWithInlineKeyboard(chatId, "Нажмите на кнопку ниже, чтобы открыть веб-приложение:", inlineKeyboardMarkup);
+        }
     }
 
-
-    public void sendResponse(long chatId, String text) {
+    // Обновленный метод sendResponse
+    public void sendResponse(long chatId, String text, ReplyKeyboardMarkup replyKeyboard) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(text);
-        System.out.println("TEST: "+ message);
+        System.out.println("TEST: " + message);
+
+        if (replyKeyboard != null) {
+            message.setReplyMarkup(replyKeyboard); // Устанавливаем обычную клавиатуру, если она не null
+        }
+
+        try {
+            execute(message); // Отправляем сообщение
+        } catch (TelegramApiException e) {
+            logger.error("Ошибка при отправке сообщения: ", e);
+        }
+    }
+
+
+    public void sendResponseWithInlineKeyboard(long chatId, String text, InlineKeyboardMarkup inlineKeyboard) {
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(text);
+
+        if (inlineKeyboard != null) {
+            message.setReplyMarkup(inlineKeyboard); // Устанавливаем инлайн клавиатуру, если она не null
+        }
 
         try {
             execute(message); // Отправляем сообщение
@@ -92,25 +125,3 @@ public class BotController extends TelegramLongPollingBot {
         }
     }
 }
-
-//        if (containsHtml(text)) {
-//            message.setParseMode("HTML"); // Указываем режим парсинга как HTML
-//            logger.info("Sending HTML message to chatId {}: {}", chatId, text);
-//            try {
-//                execute(message); // Отправляем сообщение
-//            } catch (TelegramApiException e) {
-//                logger.error("Ошибка при отправке сообщения: ", e);
-//            }
-//        } else {
-//            try {
-//                execute(message); // Отправляем сообщение
-//            } catch (TelegramApiException e) {
-//                logger.error("Ошибка при отправке сообщения: ", e);
-//            }
-//        }
-//
-//    }
-//
-//    private boolean containsHtml(String message) {
-//        return HTML_PATTERN.matcher(message).find();
-//    }
