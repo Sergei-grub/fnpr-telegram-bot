@@ -32,7 +32,7 @@ public class CommandHandler {
         Buttons foundButton = matchingButtons.get(0);
         String textInfo = foundButton.getTextInfo(); // Предполагаем, что метод getTextInfo() возвращает значение поля text_info
         System.out.println("Retrieved textInfo: " + textInfo);
-        System.out.println("Contains newline: " + textInfo.contains("\n"));
+//        System.out.println("Contains newline: " + textInfo.contains("\n"));
 
         // Возвращаем значение text_info
         return textInfo;

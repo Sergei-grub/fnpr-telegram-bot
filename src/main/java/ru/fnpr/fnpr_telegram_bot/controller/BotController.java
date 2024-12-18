@@ -6,18 +6,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.fnpr.fnpr_telegram_bot.model.Buttons;
 import ru.fnpr.fnpr_telegram_bot.model.ButtonsService;
 import ru.fnpr.fnpr_telegram_bot.view.InlineKeyboard;
 import ru.fnpr.fnpr_telegram_bot.view.KeyboardMarkup;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 @Component
@@ -26,6 +33,7 @@ public class BotController extends TelegramLongPollingBot {
     private String botName;
 //    private final ButtonsService buttonsService;
 
+    private final BotCommands botCommands;
     private final CommandHandler commandHandler;
     private final UserResponseHandler userResponseHandler;
     private final CallbackQueryHandler callbackQueryHandler;
@@ -37,18 +45,26 @@ public class BotController extends TelegramLongPollingBot {
     public BotController(@Value("${telegram.bot.name}") String botName,
                          @Value("${telegram.bot.token}") String botToken,
                          ButtonsService buttonsService,
+                         BotCommands botCommands,
                          CommandHandler commandHandler,
                          UserResponseHandler userResponseHandler,
-                         CallbackQueryHandler callbackQueryHandler, KeyboardMarkup keyboardMarkup, InlineKeyboard inlineKeyboard) {
+                         CallbackQueryHandler callbackQueryHandler,
+                         KeyboardMarkup keyboardMarkup,
+                         InlineKeyboard inlineKeyboard) {
         super(new DefaultBotOptions(), botToken);
         this.botName = botName;
+        this.botCommands = botCommands;
 //        this.buttonsService = buttonsService;
         this.commandHandler = commandHandler;
         this.userResponseHandler = userResponseHandler;
         this.callbackQueryHandler = callbackQueryHandler;
         this.keyboardMarkup = keyboardMarkup;
         this.inlineKeyboard = inlineKeyboard;
+
+// Устанавливаем команды при инициализации бота
+        setBotCommands();
     }
+
     @Override
     public String getBotUsername() {
         return botName;
@@ -64,6 +80,8 @@ public class BotController extends TelegramLongPollingBot {
             Long chatId = update.getMessage().getChatId();
 
             String testMsg = "Привет!\nКак дела?";
+
+
             // Создаем обычные кнопки
             ReplyKeyboardMarkup keyboard = keyboardMarkup.createReplyKeyboard("keyboard");
             sendResponse(chatId, testMsg, keyboard);
@@ -87,6 +105,25 @@ public class BotController extends TelegramLongPollingBot {
 
             // Отправляем сообщение с инлайн-кнопкой
             sendResponseWithInlineKeyboard(chatId, "Нажмите на кнопку ниже, чтобы открыть веб-приложение:", inlineKeyboardMarkup);
+        }
+    }
+
+    // Метод для установки команд
+    private void setBotCommands() {
+        List<Buttons> commandButtons = botCommands.getCommandButtons();
+        List<BotCommand> commands = new ArrayList<>();
+
+        for (Buttons button: commandButtons) {
+            commands.add(new BotCommand(button.getName(), button.getTextInfo()));
+        }
+
+        SetMyCommands setMyCommands = new SetMyCommands();
+        setMyCommands.setCommands(commands);
+
+        try {
+            execute(setMyCommands); // Устанавливаем команды
+        } catch (TelegramApiException e) {
+            logger.error("Ошибка при установке команд: ", e);
         }
     }
 
